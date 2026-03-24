@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/joho/godotenv"
-	"github.com/momoyo-droid/capim/api/utils"
+	"github.com/momoyo-droid/capim/api/internal/utils"
 )
 
 type Config struct {
