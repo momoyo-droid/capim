@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/momoyo-droid/capim/api/internal/config"
+	"github.com/momoyo-droid/capim/api/internal/handler"
 	"go.uber.org/zap"
 )
 
@@ -25,16 +26,12 @@ func main() {
 
 	router := gin.Default()
 
+	router.GET("/health", handler.HealthCheck())
+
 	logger.Info("Server is running on port " + cfg.Port)
 
 	if err := router.Run(":" + cfg.Port); err != nil {
 		logger.Fatal("Failed to start server", zap.Error(err))
 	}
-
-	router.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"status": "ok",
-		})
-	})
 
 }
