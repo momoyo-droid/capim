@@ -58,7 +58,20 @@ func (h *SellerHandler) CreateSeller(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "Seller created successfully"})
+	ctx.JSON(http.StatusCreated, gin.H{"message": "Seller created successfully"})
+}
+
+func (h *SellerHandler) GetAllSellers(ctx *gin.Context) {
+	context := ctx.Request.Context()
+	defer ctx.Request.Body.Close()
+
+	sellers, err := h.Service.GetAllSellers(context)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve sellers"})
+		return
+	}
+	
+	ctx.JSON(http.StatusOK, gin.H{"message": "Sellers retrieved successfully", "sellers": sellers})
 }
 
 func validateInputRequest(request SellerRequest) (model.Seller, error) {
