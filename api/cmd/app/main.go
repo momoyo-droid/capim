@@ -4,6 +4,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/momoyo-droid/capim/api/internal/config"
 	"github.com/momoyo-droid/capim/api/internal/handler"
+	"github.com/momoyo-droid/capim/api/internal/repository"
+	"github.com/momoyo-droid/capim/api/internal/repository/postgres"
+	"github.com/momoyo-droid/capim/api/internal/service"
 	"go.uber.org/zap"
 )
 
@@ -18,20 +21,30 @@ func logger() *zap.Logger {
 func main() {
 	cfg, err := config.LoadConfig()
 
-	logger := logger()
+	zapLogger := logger()
 
 	if err != nil {
-		logger.Fatal("Failed to load configuration", zap.Error(err))
+		zapLogger.Fatal("Failed to load configuration", zap.Error(err))
 	}
+
+	db, err := postgres.NewDatabaseConnection(cfg)
+	if err != nil {
+		zapLogger.Fatal("Failed to connect to database", zap.Error(err))
+	}
+
+	repository := repository.NewSellerRepository(db)
+	sellerService := service.NewSellerService(repository)
+	sellerHandler := handler.SellerHandler{Service: sellerService}
 
 	router := gin.Default()
 
-	router.GET("/health", handler.HealthCheck())
+	router.GET("/health", handler.HealthCheck)
+	router.POST("/sellers", sellerHandler.CreateSeller)
 
-	logger.Info("Server is running on port " + cfg.Port)
+	zapLogger.Info("Server is running on port " + cfg.Port)
 
-	if err := router.Run(":" + cfg.Port); err != nil {
-		logger.Fatal("Failed to start server", zap.Error(err))
+	if err := router.Run("localhost:" + cfg.Port); err != nil {
+		zapLogger.Fatal("Failed to start server", zap.Error(err))
 	}
 
 }
