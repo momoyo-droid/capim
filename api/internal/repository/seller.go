@@ -52,3 +52,16 @@ func (r *SellerRepository) GetAllSellers(ctx context.Context) ([]model.Seller, e
 
 	return modelSellers, nil
 }
+
+func (r *SellerRepository) GetSellerByID(ctx context.Context, sellerID string) (model.Seller, error) {
+	var seller Seller
+
+	if err := r.Storage.WithContext(ctx).Preload("Owner").First(&seller, sellerID).Error; err != nil {
+		return model.Seller{}, fmt.Errorf("get seller by ID on database: %w", err)
+	}
+
+	var modelSeller model.Seller
+	copier.Copy(&modelSeller, &seller)
+
+	return modelSeller, nil
+}

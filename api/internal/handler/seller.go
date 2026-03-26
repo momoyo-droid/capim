@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
@@ -70,8 +71,40 @@ func (h *SellerHandler) GetAllSellers(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve sellers"})
 		return
 	}
-	
+
 	ctx.JSON(http.StatusOK, gin.H{"message": "Sellers retrieved successfully", "sellers": sellers})
+}
+
+func (h *SellerHandler) GetSellerByID(ctx *gin.Context) {
+	context := ctx.Request.Context()
+	defer ctx.Request.Body.Close()
+
+	sellerID := ctx.Param("id")
+
+	if err := validateSellerID(sellerID); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid seller ID"})
+		return
+	}
+
+	seller, err := h.Service.GetSellerByID(context, sellerID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve seller"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Seller retrieved successfully", "seller": seller})
+}
+
+func validateSellerID(sellerID string) error {
+	if sellerID == "" {
+		return fmt.Errorf("seller ID is required")
+	}
+
+	if _, err := strconv.Atoi(sellerID); err != nil {
+		return fmt.Errorf("seller ID must be a valid integer")
+	}
+
+	return nil
 }
 
 func validateInputRequest(request SellerRequest) (model.Seller, error) {
