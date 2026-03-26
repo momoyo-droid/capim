@@ -9,6 +9,7 @@ import (
 
 type SellerRepository interface {
 	CreateSeller(ctx context.Context, seller model.Seller) error
+	GetAllSellers(ctx context.Context) ([]model.Seller, error)
 }
 
 type SellerService struct {
@@ -27,4 +28,13 @@ func (s *SellerService) CreateSeller(ctx context.Context, seller model.Seller) e
 	}
 
 	return nil
+}
+
+func (s *SellerService) GetAllSellers(ctx context.Context) ([]model.Seller, error) {
+	sellers, err := s.Repository.GetAllSellers(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("get all sellers error: %w", err)
+	}
+
+	return sellers, nil
 }

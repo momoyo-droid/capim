@@ -40,6 +40,7 @@ func main() {
 
 	router.GET("/health", handler.HealthCheck)
 	router.POST("/sellers", sellerHandler.CreateSeller)
+	router.GET("/sellers", sellerHandler.GetAllSellers)
 
 	zapLogger.Info("Server is running on port " + cfg.Port)
 

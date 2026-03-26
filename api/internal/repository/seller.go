@@ -32,10 +32,23 @@ func (r *SellerRepository) CreateSeller(ctx context.Context, seller model.Seller
 	}
 
 	copier.Copy(&model.Owner, &seller.Owner)
-
+	// Save the seller along with its associated owners in a single transaction
 	if err := r.Storage.Session(&gorm.Session{FullSaveAssociations: true}).WithContext(ctx).Create(&model).Error; err != nil {
 		return fmt.Errorf("create seller on database: %w", err)
 	}
 
 	return nil
+}
+
+func (r *SellerRepository) GetAllSellers(ctx context.Context) ([]model.Seller, error) {
+	var sellers []Seller
+	// Preload the Owner association to load the related owners for each seller
+	if err := r.Storage.WithContext(ctx).Preload("Owner").Find(&sellers).Error; err != nil {
+		return nil, fmt.Errorf("get all sellers on database: %w", err)
+	}
+
+	var modelSellers []model.Seller
+	copier.Copy(&modelSellers, &sellers)
+
+	return modelSellers, nil
 }
