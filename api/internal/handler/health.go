@@ -6,10 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func HealthCheck() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"Status": "OK",
-		})
-	}
+func HealthCheck(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, gin.H{
+		"Status": "OK",
+	})
 }
