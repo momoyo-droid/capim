@@ -10,9 +10,10 @@ import (
 type SellerRepository interface {
 	CreateSeller(ctx context.Context, seller model.Seller) error
 	GetAllSellers(ctx context.Context) ([]model.Seller, error)
-	GetSellerByID(ctx context.Context, sellerID string) (model.Seller, error)
-	DeleteSellerByID(ctx context.Context, sellerID string) error
-	UpdateSellerByID(ctx context.Context, sellerID string, updatedSeller model.Seller) error
+	GetSellerByID(ctx context.Context, sellerID uint64) (model.Seller, error)
+	DeleteSellerByID(ctx context.Context, sellerID uint64) error
+	UpdateSellerByID(ctx context.Context, sellerID uint64, updatedSeller model.Seller) error
+	UpdateOwnerByID(ctx context.Context, ownerID uint64, updatedOwner model.Owner) error
 }
 
 type SellerService struct {
@@ -42,7 +43,7 @@ func (s *SellerService) GetAllSellers(ctx context.Context) ([]model.Seller, erro
 	return sellers, nil
 }
 
-func (s *SellerService) GetSellerByID(ctx context.Context, sellerID string) (model.Seller, error) {
+func (s *SellerService) GetSellerByID(ctx context.Context, sellerID uint64) (model.Seller, error) {
 	seller, err := s.Repository.GetSellerByID(ctx, sellerID)
 	if err != nil {
 		return model.Seller{}, fmt.Errorf("get seller by ID error: %w", err)
@@ -51,7 +52,7 @@ func (s *SellerService) GetSellerByID(ctx context.Context, sellerID string) (mod
 	return seller, nil
 }
 
-func (s *SellerService) DeleteSellerByID(ctx context.Context, sellerID string) error {
+func (s *SellerService) DeleteSellerByID(ctx context.Context, sellerID uint64) error {
 	err := s.Repository.DeleteSellerByID(ctx, sellerID)
 	if err != nil {
 		return fmt.Errorf("delete seller by ID error: %w", err)
@@ -60,10 +61,19 @@ func (s *SellerService) DeleteSellerByID(ctx context.Context, sellerID string) e
 	return nil
 }
 
-func (s *SellerService) UpdateSellerByID(ctx context.Context, sellerID string, updatedSeller model.Seller) error {
+func (s *SellerService) UpdateSellerByID(ctx context.Context, sellerID uint64, updatedSeller model.Seller) error {
 	err := s.Repository.UpdateSellerByID(ctx, sellerID, updatedSeller)
 	if err != nil {
 		return fmt.Errorf("update seller by ID error: %w", err)
+	}
+
+	return nil
+}
+
+func (s *SellerService) UpdateOwnerByID(ctx context.Context, ownerID uint64, updatedOwner model.Owner) error {
+	err := s.Repository.UpdateOwnerByID(ctx, ownerID, updatedOwner)
+	if err != nil {
+		return fmt.Errorf("update owner by ID error: %w", err)
 	}
 
 	return nil

@@ -54,7 +54,7 @@ func (r *SellerRepository) GetAllSellers(ctx context.Context) ([]model.Seller, e
 	return modelSellers, nil
 }
 
-func (r *SellerRepository) GetSellerByID(ctx context.Context, sellerID string) (model.Seller, error) {
+func (r *SellerRepository) GetSellerByID(ctx context.Context, sellerID uint64) (model.Seller, error) {
 	var seller Seller
 	// Preload the Owner association to load the related owners for each seller
 	if err := r.Storage.WithContext(ctx).Preload("Owner").First(&seller, sellerID).Error; err != nil {
@@ -67,21 +67,33 @@ func (r *SellerRepository) GetSellerByID(ctx context.Context, sellerID string) (
 	return modelSeller, nil
 }
 
-func (r *SellerRepository) DeleteSellerByID(ctx context.Context, sellerID string) error {
+func (r *SellerRepository) DeleteSellerByID(ctx context.Context, sellerID uint64) error {
 	var seller Seller
 
-	if err := r.Storage.WithContext(ctx).Preload("Owner").Delete(&seller, sellerID).Error; err != nil {
+	if err := r.Storage.WithContext(ctx).Delete(&seller, sellerID).Error; err != nil {
 		return fmt.Errorf("delete seller by ID on database: %w", err)
 	}
 
 	return nil
 }
 
-func (r *SellerRepository) UpdateSellerByID(ctx context.Context, sellerID string, updatedSeller model.Seller) error {
+func (r *SellerRepository) UpdateSellerByID(ctx context.Context, sellerID uint64, updatedSeller model.Seller) error {
 	var seller Seller
+	copier.Copy(&seller, &updatedSeller)
 
-	if err := r.Storage.WithContext(ctx).Preload("Owner").Updates(&seller).Error; err != nil {
+	if err := r.Storage.WithContext(ctx).Where("id = ?", sellerID).Updates(&seller).Error; err != nil {
 		return fmt.Errorf("update seller by ID on database: %w", err)
+	}
+
+	return nil
+}
+
+func (r *SellerRepository) UpdateOwnerByID(ctx context.Context, ownerID uint64, updatedOwner model.Owner) error {
+	var owner Owner
+	copier.Copy(&owner, &updatedOwner)
+
+	if err := r.Storage.WithContext(ctx).Where("id = ?", ownerID).Updates(&owner).Error; err != nil {
+		return fmt.Errorf("update owner by ID on database: %w", err)
 	}
 
 	return nil
