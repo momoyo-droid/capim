@@ -20,6 +20,7 @@ func NewSellerRepository(storage *gorm.DB) *SellerRepository {
 }
 
 func (r *SellerRepository) CreateSeller(ctx context.Context, seller model.Seller) error {
+	// Verificar se o seller já existe no banco de dados
 	model := Seller{
 		Document:     seller.Document,
 		LegalName:    seller.LegalName,
@@ -55,7 +56,7 @@ func (r *SellerRepository) GetAllSellers(ctx context.Context) ([]model.Seller, e
 
 func (r *SellerRepository) GetSellerByID(ctx context.Context, sellerID string) (model.Seller, error) {
 	var seller Seller
-
+	// Preload the Owner association to load the related owners for each seller
 	if err := r.Storage.WithContext(ctx).Preload("Owner").First(&seller, sellerID).Error; err != nil {
 		return model.Seller{}, fmt.Errorf("get seller by ID on database: %w", err)
 	}
@@ -64,4 +65,14 @@ func (r *SellerRepository) GetSellerByID(ctx context.Context, sellerID string) (
 	copier.Copy(&modelSeller, &seller)
 
 	return modelSeller, nil
+}
+
+func (r *SellerRepository) DeleteSellerByID(ctx context.Context, sellerID string) error {
+	var seller Seller
+
+	if err := r.Storage.WithContext(ctx).Preload("Owner").Delete(&seller, sellerID).Error; err != nil {
+		return fmt.Errorf("delete seller by ID on database: %w", err)
+	}
+
+	return nil
 }

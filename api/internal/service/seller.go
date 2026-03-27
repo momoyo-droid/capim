@@ -11,6 +11,7 @@ type SellerRepository interface {
 	CreateSeller(ctx context.Context, seller model.Seller) error
 	GetAllSellers(ctx context.Context) ([]model.Seller, error)
 	GetSellerByID(ctx context.Context, sellerID string) (model.Seller, error)
+	DeleteSellerByID(ctx context.Context, sellerID string) error
 }
 
 type SellerService struct {
@@ -47,4 +48,13 @@ func (s *SellerService) GetSellerByID(ctx context.Context, sellerID string) (mod
 	}
 
 	return seller, nil
+}
+
+func (s *SellerService) DeleteSellerByID(ctx context.Context, sellerID string) error {
+	err := s.Repository.DeleteSellerByID(ctx, sellerID)
+	if err != nil {
+		return fmt.Errorf("delete seller by ID error: %w", err)
+	}
+
+	return nil
 }

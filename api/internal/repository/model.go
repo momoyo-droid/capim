@@ -1,5 +1,17 @@
 package repository
 
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
+
+type Audit struct {
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+}
+
 type Owner struct {
 	ID       uint   `gorm:"primaryKey;autoIncrement"`
 	SellerID uint   `gorm:"column:seller_id"`
@@ -21,4 +33,5 @@ type Seller struct {
 	BusinessName string      `gorm:"column:business_name"`
 	BankAccount  BankAccount `gorm:"embedded"`
 	Owner        []Owner     `gorm:"foreignKey:SellerID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Audit        Audit       `gorm:"embedded"`
 }
