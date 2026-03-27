@@ -81,12 +81,13 @@ func (h *SellerHandler) GetSellerByID(ctx *gin.Context) {
 
 	sellerID := ctx.Param("id")
 
-	if err := validateSellerID(sellerID); err != nil {
+	id, err := validateSellerID(sellerID)
+	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid seller ID"})
 		return
 	}
 
-	seller, err := h.Service.GetSellerByID(context, sellerID)
+	seller, err := h.Service.GetSellerByID(context, id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve seller"})
 		return
@@ -101,12 +102,13 @@ func (h *SellerHandler) DeleteSellerByID(ctx *gin.Context) {
 
 	sellerID := ctx.Param("id")
 
-	if err := validateSellerID(sellerID); err != nil {
+	id, err := validateSellerID(sellerID)
+	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid seller ID"})
 		return
 	}
 
-	err := h.Service.DeleteSellerByID(context, sellerID)
+	err = h.Service.DeleteSellerByID(context, id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete seller"})
 		return
@@ -121,7 +123,8 @@ func (h *SellerHandler) UpdateSellerByID(ctx *gin.Context) {
 
 	sellerID := ctx.Param("id")
 
-	if err := validateSellerID(sellerID); err != nil {
+	id, err := validateSellerID(sellerID)
+	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid seller ID"})
 		return
 	}
@@ -132,15 +135,10 @@ func (h *SellerHandler) UpdateSellerByID(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
 	}
+	var input model.Seller
+	copier.Copy(&input, &request)
 
-	input, err := validateInputRequest(request)
-
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	err = h.Service.UpdateSellerByID(context, sellerID, input)
+	err = h.Service.UpdateSellerByID(context, id, input)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update seller"})
 		return
@@ -149,16 +147,48 @@ func (h *SellerHandler) UpdateSellerByID(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "Seller updated successfully"})
 }
 
-func validateSellerID(sellerID string) error {
+func (h *SellerHandler) UpdateOwnerByID(ctx *gin.Context) {
+	context := ctx.Request.Context()
+	defer ctx.Request.Body.Close()
+
+	sellerID := ctx.Param("id")
+
+	id, err := validateSellerID(sellerID)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid seller ID"})
+		return
+	}
+
+	var request Owner
+
+	if err := json.NewDecoder(ctx.Request.Body).Decode(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+	var input model.Owner
+	copier.Copy(&input, &request)
+
+	err = h.Service.UpdateOwnerByID(context, id, input)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update owner"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Owner updated successfully"})
+
+}
+
+func validateSellerID(sellerID string) (uint64, error) {
 	if sellerID == "" {
-		return fmt.Errorf("seller ID is required")
+		return 0, fmt.Errorf("seller ID is required")
 	}
 
-	if _, err := strconv.Atoi(sellerID); err != nil {
-		return fmt.Errorf("seller ID must be a valid integer")
+	id, err := strconv.ParseUint(sellerID, 10, 64)
+	if err != nil {
+		return 0, fmt.Errorf("seller ID must be a valid integer")
 	}
 
-	return nil
+	return id, nil
 }
 
 func validateInputRequest(request SellerRequest) (model.Seller, error) {
