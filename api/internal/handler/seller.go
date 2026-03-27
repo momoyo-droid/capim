@@ -95,6 +95,26 @@ func (h *SellerHandler) GetSellerByID(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "Seller retrieved successfully", "seller": seller})
 }
 
+func (h *SellerHandler) DeleteSellerByID(ctx *gin.Context) {
+	context := ctx.Request.Context()
+	defer ctx.Request.Body.Close()
+
+	sellerID := ctx.Param("id")
+
+	if err := validateSellerID(sellerID); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid seller ID"})
+		return
+	}
+
+	err := h.Service.DeleteSellerByID(context, sellerID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete seller"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Seller deleted successfully"})
+}
+
 func validateSellerID(sellerID string) error {
 	if sellerID == "" {
 		return fmt.Errorf("seller ID is required")

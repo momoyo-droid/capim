@@ -42,6 +42,7 @@ func main() {
 	router.POST("/sellers", sellerHandler.CreateSeller)
 	router.GET("/sellers", sellerHandler.GetAllSellers)
 	router.GET("/sellers/:id", sellerHandler.GetSellerByID)
+	router.DELETE("/sellers/:id", sellerHandler.DeleteSellerByID)
 
 	zapLogger.Info("Server is running on port " + cfg.Port)
 
