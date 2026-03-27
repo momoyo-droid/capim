@@ -12,6 +12,7 @@ type SellerRepository interface {
 	GetAllSellers(ctx context.Context) ([]model.Seller, error)
 	GetSellerByID(ctx context.Context, sellerID string) (model.Seller, error)
 	DeleteSellerByID(ctx context.Context, sellerID string) error
+	UpdateSellerByID(ctx context.Context, sellerID string, updatedSeller model.Seller) error
 }
 
 type SellerService struct {
@@ -54,6 +55,15 @@ func (s *SellerService) DeleteSellerByID(ctx context.Context, sellerID string) e
 	err := s.Repository.DeleteSellerByID(ctx, sellerID)
 	if err != nil {
 		return fmt.Errorf("delete seller by ID error: %w", err)
+	}
+
+	return nil
+}
+
+func (s *SellerService) UpdateSellerByID(ctx context.Context, sellerID string, updatedSeller model.Seller) error {
+	err := s.Repository.UpdateSellerByID(ctx, sellerID, updatedSeller)
+	if err != nil {
+		return fmt.Errorf("update seller by ID error: %w", err)
 	}
 
 	return nil

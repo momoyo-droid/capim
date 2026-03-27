@@ -76,3 +76,13 @@ func (r *SellerRepository) DeleteSellerByID(ctx context.Context, sellerID string
 
 	return nil
 }
+
+func (r *SellerRepository) UpdateSellerByID(ctx context.Context, sellerID string, updatedSeller model.Seller) error {
+	var seller Seller
+
+	if err := r.Storage.WithContext(ctx).Preload("Owner").Updates(&seller).Error; err != nil {
+		return fmt.Errorf("update seller by ID on database: %w", err)
+	}
+
+	return nil
+}

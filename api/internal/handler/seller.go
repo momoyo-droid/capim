@@ -115,6 +115,40 @@ func (h *SellerHandler) DeleteSellerByID(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "Seller deleted successfully"})
 }
 
+func (h *SellerHandler) UpdateSellerByID(ctx *gin.Context) {
+	context := ctx.Request.Context()
+	defer ctx.Request.Body.Close()
+
+	sellerID := ctx.Param("id")
+
+	if err := validateSellerID(sellerID); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid seller ID"})
+		return
+	}
+
+	var request SellerRequest
+
+	if err := json.NewDecoder(ctx.Request.Body).Decode(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	input, err := validateInputRequest(request)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = h.Service.UpdateSellerByID(context, sellerID, input)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update seller"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Seller updated successfully"})
+}
+
 func validateSellerID(sellerID string) error {
 	if sellerID == "" {
 		return fmt.Errorf("seller ID is required")
