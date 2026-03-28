@@ -28,7 +28,7 @@ type BankAccount struct {
 
 type Seller struct {
 	ID           uint        `gorm:"primaryKey;autoIncrement"`
-	Document     string      `gorm:"column:document"`
+	Document     string      `gorm:"column:document;uniqueIndex"`
 	LegalName    string      `gorm:"column:legal_name"`
 	BusinessName string      `gorm:"column:business_name"`
 	BankAccount  BankAccount `gorm:"embedded"`

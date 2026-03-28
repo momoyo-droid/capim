@@ -6,6 +6,7 @@ import (
 
 	"github.com/jinzhu/copier"
 	"github.com/momoyo-droid/capim/api/internal/model"
+	"github.com/momoyo-droid/capim/api/internal/utils"
 	"gorm.io/gorm"
 )
 
@@ -20,7 +21,6 @@ func NewSellerRepository(storage *gorm.DB) *SellerRepository {
 }
 
 func (r *SellerRepository) CreateSeller(ctx context.Context, seller model.Seller) error {
-	// Verificar se o seller já existe no banco de dados
 	model := Seller{
 		Document:     seller.Document,
 		LegalName:    seller.LegalName,
@@ -58,6 +58,9 @@ func (r *SellerRepository) GetSellerByID(ctx context.Context, sellerID uint64) (
 	var seller Seller
 	// Preload the Owner association to load the related owners for each seller
 	if err := r.Storage.WithContext(ctx).Preload("Owner").First(&seller, sellerID).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return model.Seller{}, utils.ErrSellerIDNotFound
+		}
 		return model.Seller{}, fmt.Errorf("get seller by ID on database: %w", err)
 	}
 
@@ -67,10 +70,24 @@ func (r *SellerRepository) GetSellerByID(ctx context.Context, sellerID uint64) (
 	return modelSeller, nil
 }
 
+func (r *SellerRepository) GetSellerByDocument(ctx context.Context, document string) (bool, error) {
+	if err := r.Storage.WithContext(ctx).Where("document = ?", document).First(&Seller{}).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return false, nil
+		}
+		return false, fmt.Errorf("get seller by document on database: %w", err)
+	}
+
+	return true, nil
+}
+
 func (r *SellerRepository) DeleteSellerByID(ctx context.Context, sellerID uint64) error {
 	var seller Seller
 
 	if err := r.Storage.WithContext(ctx).Delete(&seller, sellerID).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return utils.ErrSellerIDNotFound
+		}
 		return fmt.Errorf("delete seller by ID on database: %w", err)
 	}
 
@@ -82,6 +99,9 @@ func (r *SellerRepository) UpdateSellerByID(ctx context.Context, sellerID uint64
 	copier.Copy(&seller, &updatedSeller)
 
 	if err := r.Storage.WithContext(ctx).Where("id = ?", sellerID).Updates(&seller).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return utils.ErrSellerIDNotFound
+		}
 		return fmt.Errorf("update seller by ID on database: %w", err)
 	}
 
@@ -93,6 +113,9 @@ func (r *SellerRepository) UpdateOwnerByID(ctx context.Context, ownerID uint64, 
 	copier.Copy(&owner, &updatedOwner)
 
 	if err := r.Storage.WithContext(ctx).Where("id = ?", ownerID).Updates(&owner).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return fmt.Errorf("owner with ID %d not found", ownerID)
+		}
 		return fmt.Errorf("update owner by ID on database: %w", err)
 	}
 
