@@ -11,6 +11,7 @@ type SellerRepository interface {
 	CreateSeller(ctx context.Context, seller model.Seller) error
 	GetAllSellers(ctx context.Context) ([]model.Seller, error)
 	GetSellerByID(ctx context.Context, sellerID uint64) (model.Seller, error)
+	GetSellerByDocument(ctx context.Context, document string) (bool, error)
 	DeleteSellerByID(ctx context.Context, sellerID uint64) error
 	UpdateSellerByID(ctx context.Context, sellerID uint64, updatedSeller model.Seller) error
 	UpdateOwnerByID(ctx context.Context, ownerID uint64, updatedOwner model.Owner) error
@@ -27,6 +28,28 @@ func NewSellerService(repository SellerRepository) *SellerService {
 }
 
 func (s *SellerService) CreateSeller(ctx context.Context, seller model.Seller) error {
+	if seller.Document == "" || seller.LegalName == "" || seller.BusinessName == "" {
+		return fmt.Errorf("document, legal name, and business name are required")
+	}
+
+	if len(seller.Owner) == 0 {
+		return fmt.Errorf("at least one owner is required")
+	}
+
+	if seller.BankAccount.BankCode == "" || seller.BankAccount.AgencyNumber == "" || seller.BankAccount.AccountNumber == "" {
+		return fmt.Errorf("bank account information is required")
+	}
+
+	// Check if the record already exists in the database
+	existingSeller, err := s.Repository.GetSellerByDocument(ctx, seller.Document)
+	if err != nil {
+		return fmt.Errorf("check existing seller error: %w", err)
+	}
+
+	if existingSeller {
+		return fmt.Errorf("a seller with the same document already exists")
+	}
+
 	if err := s.Repository.CreateSeller(ctx, seller); err != nil {
 		return fmt.Errorf("create seller error: %w", err)
 	}

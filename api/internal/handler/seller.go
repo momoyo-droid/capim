@@ -46,16 +46,12 @@ func (h *SellerHandler) CreateSeller(ctx *gin.Context) {
 		return
 	}
 
-	input, err := validateInputRequest(request)
+	var input model.Seller
+	copier.Copy(&input, &request)
 
+	err := h.Service.CreateSeller(context, input)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	err = h.Service.CreateSeller(context, input)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create seller"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"details": err.Error(),"error": "Failed to create seller"})
 		return
 	}
 
@@ -189,25 +185,4 @@ func validateSellerID(sellerID string) (uint64, error) {
 	}
 
 	return id, nil
-}
-
-func validateInputRequest(request SellerRequest) (model.Seller, error) {
-	if request.Document == "" || request.LegalName == "" || request.BusinessName == "" {
-		return model.Seller{}, fmt.Errorf("document, legal_name and business_name are required")
-	}
-
-	input := model.Seller{
-		Document:     request.Document,
-		LegalName:    request.LegalName,
-		BusinessName: request.BusinessName,
-		BankAccount: model.BankAccount{
-			BankCode:      request.BankAccount.BankCode,
-			AgencyNumber:  request.BankAccount.AgencyNumber,
-			AccountNumber: request.BankAccount.AccountNumber,
-		},
-	}
-
-	copier.Copy(&input.Owner, &request.Owner)
-
-	return input, nil
 }

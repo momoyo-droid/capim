@@ -20,7 +20,6 @@ func NewSellerRepository(storage *gorm.DB) *SellerRepository {
 }
 
 func (r *SellerRepository) CreateSeller(ctx context.Context, seller model.Seller) error {
-	// Verificar se o seller já existe no banco de dados
 	model := Seller{
 		Document:     seller.Document,
 		LegalName:    seller.LegalName,
@@ -65,6 +64,17 @@ func (r *SellerRepository) GetSellerByID(ctx context.Context, sellerID uint64) (
 	copier.Copy(&modelSeller, &seller)
 
 	return modelSeller, nil
+}
+
+func (r *SellerRepository) GetSellerByDocument(ctx context.Context, document string) (bool, error) {
+	if err := r.Storage.WithContext(ctx).Where("document = ?", document).First(&Seller{}).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return false, nil
+		}
+		return false, fmt.Errorf("get seller by document on database: %w", err)
+	}
+
+	return true, nil
 }
 
 func (r *SellerRepository) DeleteSellerByID(ctx context.Context, sellerID uint64) error {
