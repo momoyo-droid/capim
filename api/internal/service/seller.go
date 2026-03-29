@@ -9,11 +9,12 @@ import (
 	"github.com/momoyo-droid/capim/api/internal/utils"
 )
 
+// moq -out service/mocks/seller_repository_mock.go -pkg mocks . SellerRepository
 type SellerRepository interface {
 	CreateSeller(ctx context.Context, seller model.Seller) error
 	GetAllSellers(ctx context.Context) ([]model.Seller, error)
 	GetSellerByID(ctx context.Context, sellerID uint64) (model.Seller, error)
-	GetSellerByDocument(ctx context.Context, document string) (bool, error)
+	CheckSellerByDocument(ctx context.Context, document string) (model.Seller, error)
 	DeleteSellerByID(ctx context.Context, sellerID uint64) error
 	UpdateSellerByID(ctx context.Context, sellerID uint64, updatedSeller model.Seller) error
 	UpdateOwnerByID(ctx context.Context, ownerID uint64, updatedOwner model.Owner) error
@@ -35,12 +36,12 @@ func (s *SellerService) CreateSeller(ctx context.Context, seller model.Seller) e
 	}
 
 	// Check if the record already exists in the database
-	existingSeller, err := s.Repository.GetSellerByDocument(ctx, seller.Document)
+	sellerDocument, err := s.Repository.CheckSellerByDocument(ctx, seller.Document)
 	if err != nil {
 		return fmt.Errorf("check existing seller error: %w", err)
 	}
 
-	if existingSeller {
+	if sellerDocument.Document == seller.Document {
 		return fmt.Errorf("a seller with the same document already exists")
 	}
 
