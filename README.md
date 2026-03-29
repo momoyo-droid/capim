@@ -16,7 +16,7 @@
     2) Melhorar cobertura de testes unitários
     3) Melhorar lógica para atualização dos dados de Owners (Administradores)
 
-3. Se usou IA, como ela ajudou e onde você optou por fazer diferente do que ela sugeriu?
+3. Se usou IA, como ela ajudou e onde você optou por fazer diferente do que ela sugeriu? <br>
     A IA me ajudou a acelerar o desenvolvimento da API, oferecendo suporte sobre decisões técnicas de desenvolvimento, como qual framework Go utilizar.
     Dado a simplicidade da API, a IA havia sugerido de persistir os dados em memória, porém como possuo experiência com o uso de GORM com integração PostgreSQL, optei por seguir nesta direção.
  
