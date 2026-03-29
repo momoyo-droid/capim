@@ -9,6 +9,10 @@ import (
 	"gorm.io/gorm"
 )
 
+// NewDatabaseConnection establishes a new database connection using the provided configuration.
+// It returns a gorm.DB instance and an error if the connection fails.
+// The function also performs auto-migration for the Seller and Owner models to
+// ensure the database schema is up to date.
 func NewDatabaseConnection(cfg *config.Config) (*gorm.DB, error) {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		cfg.DBHost, cfg.DBUser, cfg.DBPassword, cfg.DBName, cfg.DBPort)
@@ -18,7 +22,9 @@ func NewDatabaseConnection(cfg *config.Config) (*gorm.DB, error) {
 		return nil, fmt.Errorf("create database connection error: %w", err)
 	}
 	// Create tables if they do not exist
-	db.AutoMigrate(&repository.Seller{}, &repository.Owner{})
+	if err := db.AutoMigrate(&repository.Seller{}, &repository.Owner{}); err != nil {
+		return nil, fmt.Errorf("auto-migrate error: %w", err)
+	}
 
 	return db, nil
 }

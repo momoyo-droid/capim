@@ -8,6 +8,8 @@ import (
 	"github.com/momoyo-droid/capim/api/internal/utils"
 )
 
+// Config struct holds the configuration values for the application,
+// including server port and database connection details.
 type Config struct {
 	Port       string
 	DBHost     string
@@ -17,8 +19,13 @@ type Config struct {
 	DBPort     string
 }
 
+// LoadConfig loads the configuration values from environment variables and validates them.
+// It returns a Config struct and an error if any required configuration is missing or invalid.
 func LoadConfig() (*Config, error) {
-	godotenv.Load()
+	err := godotenv.Load()
+	if err != nil {
+		return nil, err
+	}
 
 	port := os.Getenv("PORT")
 	DBHost := os.Getenv("DB_HOST")

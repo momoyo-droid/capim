@@ -10,11 +10,14 @@ import (
 	"go.uber.org/zap"
 )
 
+// logger initializes a zap.Logger instance for logging throughout the application.
+// It logs the startup message and returns the logger instance for use in the main function
+// and other parts of the application.
 func logger() *zap.Logger {
 	logger := zap.Must(zap.NewDevelopment())
-	defer logger.Sync()
 
 	logger.Info("Starting clinical management API")
+
 	return logger
 }
 
@@ -22,6 +25,10 @@ func main() {
 	cfg, err := config.LoadConfig()
 
 	zapLogger := logger()
+
+	defer func() {
+		_ = zapLogger.Sync()
+	}()
 
 	if err != nil {
 		zapLogger.Fatal("Failed to load configuration", zap.Error(err))
