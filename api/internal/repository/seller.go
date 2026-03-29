@@ -55,9 +55,8 @@ func (r *SellerRepository) CreateSeller(ctx context.Context, seller model.Seller
 func (r *SellerRepository) GetAllSellers(ctx context.Context) ([]model.Seller, error) {
 	var sellers []Seller
 	// Preload the Owner association to load the related owners for each seller
-	result := r.Storage.WithContext(ctx).Preload("Owner").Find(&sellers)
-	if result.Error != nil {
-		return nil, fmt.Errorf("get all sellers on database: %w", result.Error)
+	if err := r.Storage.WithContext(ctx).Preload("Owner").Find(&sellers).Error; err != nil {
+		return nil, fmt.Errorf("get all sellers on database: %w", err)
 	}
 
 	var modelSellers []model.Seller
@@ -73,13 +72,11 @@ func (r *SellerRepository) GetAllSellers(ctx context.Context) ([]model.Seller, e
 func (r *SellerRepository) GetSellerByID(ctx context.Context, sellerID uint64) (model.Seller, error) {
 	var seller Seller
 	// Preload the Owner association to load the related owners for each seller
-	result := r.Storage.WithContext(ctx).Preload("Owner").First(&seller, sellerID)
-	if result.Error != nil {
-		return model.Seller{}, fmt.Errorf("get seller by ID on database: %w", result.Error)
-	}
-
-	if result.RowsAffected == 0 {
-		return model.Seller{}, utils.ErrSellerIDNotFound
+	if err := r.Storage.WithContext(ctx).Preload("Owner").First(&seller, sellerID).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return model.Seller{}, utils.ErrSellerIDNotFound
+		}
+		return model.Seller{}, fmt.Errorf("get seller by ID on database: %w", err)
 	}
 
 	var modelSeller model.Seller
@@ -95,13 +92,11 @@ func (r *SellerRepository) GetSellerByID(ctx context.Context, sellerID uint64) (
 // It returns an error if there is an issue during the database query.
 func (r *SellerRepository) CheckSellerByDocument(ctx context.Context, document string) (model.Seller, error) {
 	var seller Seller
-	result := r.Storage.WithContext(ctx).Where("document = ?", document).First(&seller)
-	if result.Error != nil {
-		return model.Seller{}, fmt.Errorf("get seller by document on database: %w", result.Error)
-	}
-
-	if result.RowsAffected == 0 {
-		return model.Seller{}, nil
+	if err := r.Storage.WithContext(ctx).Where("document = ?", document).First(&seller).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return model.Seller{}, nil // No existing seller found with the same document
+		}
+		return model.Seller{}, fmt.Errorf("get seller by document on database: %w", err)
 	}
 
 	var modelSeller model.Seller
@@ -145,7 +140,6 @@ func (r *SellerRepository) UpdateSellerByID(ctx context.Context, sellerID uint64
 	if result.RowsAffected == 0 {
 		return utils.ErrSellerIDNotFound
 	}
-
 	return nil
 }
 
@@ -165,6 +159,5 @@ func (r *SellerRepository) UpdateOwnerByID(ctx context.Context, ownerID uint64, 
 	if result.RowsAffected == 0 {
 		return fmt.Errorf("owner ID not found")
 	}
-
 	return nil
 }
