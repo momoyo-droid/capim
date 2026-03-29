@@ -1,8 +1,8 @@
 # capim
 
 ## Execução
-`go run api/cmd/app/main.go` -> Execução da API
-`make audit` -> Execução para monitoramento da qualidade de código
+`go run api/cmd/app/main.go` -> Execução da API <br>
+`make audit` -> Execução para monitoramento da qualidade de código <br>
 `make test` -> Execução de testes e visualização da % de cobertura
 
 ## Justificativa Técnica
