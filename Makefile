@@ -1,4 +1,4 @@
-.PHONY: fmt vet lint vuln audit
+.PHONY: fmt vet lint vuln audit test
 
 fmt:
 	go fmt ./...
@@ -12,4 +12,7 @@ lint:
 vuln:
 	govulncheck ./...
 
-audit: fmt vet lint vuln
+test:
+	go test ./... -cover
+
+audit: fmt vet lint vuln test
