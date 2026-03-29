@@ -7,6 +7,7 @@ import (
 
 	"github.com/momoyo-droid/capim/api/internal/model"
 	"github.com/momoyo-droid/capim/api/internal/utils"
+	"go.uber.org/zap"
 )
 
 // SellerRepository defines the interface for interacting with the seller data in the database.
@@ -27,18 +28,21 @@ type SellerRepository interface {
 // It interacts with the SellerRepository to perform database operations and includes validation logic to ensure data integrity.
 type SellerService struct {
 	Repository SellerRepository
+	Logger     *zap.Logger
 }
 
 // NewSellerService creates a new instance of SellerService with the provided SellerRepository.
-func NewSellerService(repository SellerRepository) *SellerService {
+func NewSellerService(repository SellerRepository, logger *zap.Logger) *SellerService {
 	return &SellerService{
 		Repository: repository,
+		Logger:     logger,
 	}
 }
 
 // CreateSeller validates the input seller data and checks for existing records before creating a new seller in the database.
 // It returns an error if validation fails, if a seller with the same document already exists, or if there is an issue during creation.
 func (s *SellerService) CreateSeller(ctx context.Context, seller model.Seller) error {
+	s.Logger.Info("Creating new seller")
 	if err := validateSeller(seller); err != nil {
 		return fmt.Errorf("validate seller error: %w", err)
 	}
@@ -52,7 +56,7 @@ func (s *SellerService) CreateSeller(ctx context.Context, seller model.Seller) e
 	if sellerDocument.Document == seller.Document {
 		return fmt.Errorf("a seller with the same document already exists")
 	}
-
+	s.Logger.Info("Seller validation passed, creating seller in the database")
 	if err := s.Repository.CreateSeller(ctx, seller); err != nil {
 		return fmt.Errorf("create seller error: %w", err)
 	}
@@ -63,6 +67,7 @@ func (s *SellerService) CreateSeller(ctx context.Context, seller model.Seller) e
 // GetAllSellers retrieves all sellers from the database and returns them as a slice of model.Seller.
 // It returns an error if there is an issue during retrieval.
 func (s *SellerService) GetAllSellers(ctx context.Context) ([]model.Seller, error) {
+	s.Logger.Info("Retrieving all sellers from the database")
 	sellers, err := s.Repository.GetAllSellers(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("get all sellers error: %w", err)
@@ -79,7 +84,7 @@ func (s *SellerService) GetSellerByID(ctx context.Context, sellerID string) (mod
 	if err != nil {
 		return model.Seller{}, utils.ErrInvalidID
 	}
-
+	s.Logger.Info("Retrieving seller by ID from the database")
 	seller, err := s.Repository.GetSellerByID(ctx, id)
 	if err != nil {
 		return model.Seller{}, fmt.Errorf("get seller by ID error: %w", err)
@@ -96,7 +101,7 @@ func (s *SellerService) DeleteSellerByID(ctx context.Context, sellerID string) e
 	if err != nil {
 		return utils.ErrInvalidID
 	}
-
+	s.Logger.Info("Deleting seller by ID from the database")
 	err = s.Repository.DeleteSellerByID(ctx, id)
 	if err != nil {
 		return fmt.Errorf("delete seller by ID error: %w", err)
@@ -113,7 +118,7 @@ func (s *SellerService) UpdateSellerByID(ctx context.Context, sellerID string, u
 	if err != nil {
 		return utils.ErrInvalidID
 	}
-
+	s.Logger.Info("Updating seller by ID in the database")
 	err = s.Repository.UpdateSellerByID(ctx, id, updatedSeller)
 	if err != nil {
 		return fmt.Errorf("update seller by ID error: %w", err)
@@ -130,7 +135,7 @@ func (s *SellerService) UpdateOwnerByID(ctx context.Context, ownerID string, upd
 	if err != nil {
 		return utils.ErrInvalidID
 	}
-
+	s.Logger.Info("Updating owner by ID in the database")
 	err = s.Repository.UpdateOwnerByID(ctx, id, updatedOwner)
 	if err != nil {
 		return fmt.Errorf("update owner by ID error: %w", err)
