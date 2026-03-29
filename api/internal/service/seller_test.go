@@ -8,6 +8,7 @@ import (
 	"github.com/momoyo-droid/capim/api/internal/service"
 	"github.com/momoyo-droid/capim/api/internal/service/mocks"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
 )
 
 func TestSellerService_CreateSeller_Success(t *testing.T) {
@@ -39,8 +40,8 @@ func TestSellerService_CreateSeller_Success(t *testing.T) {
 			return nil
 		},
 	}
-
-	service := service.NewSellerService(repository)
+	logger, _ := zap.NewDevelopment()
+	service := service.NewSellerService(repository, logger)
 
 	err := service.CreateSeller(ctx, *seller)
 
@@ -176,10 +177,11 @@ func TestSellerService_CreateSeller_Failure(t *testing.T) {
 			expectedError: "a seller with the same document already exists",
 		},
 	}
+	logger, _ := zap.NewDevelopment()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			service := service.NewSellerService(tt.fields.Repository)
+			service := service.NewSellerService(tt.fields.Repository, logger)
 
 			err := service.CreateSeller(tt.args.ctx, tt.args.seller)
 
@@ -200,8 +202,9 @@ func TestSellerService_GetAllSellers_Success(t *testing.T) {
 			return expected, nil
 		},
 	}
+	logger, _ := zap.NewDevelopment()
 
-	service := service.NewSellerService(repo)
+	service := service.NewSellerService(repo, logger)
 
 	result, err := service.GetAllSellers(ctx)
 
@@ -221,8 +224,9 @@ func TestSellerService_GetSellerByID_Success(t *testing.T) {
 			return expected, nil
 		},
 	}
+	logger, _ := zap.NewDevelopment()
 
-	service := service.NewSellerService(repo)
+	service := service.NewSellerService(repo, logger)
 
 	result, err := service.GetSellerByID(ctx, "1")
 
@@ -238,8 +242,9 @@ func TestSellerService_DeleteSellerByID_Success(t *testing.T) {
 			return nil
 		},
 	}
+	logger, _ := zap.NewDevelopment()
 
-	service := service.NewSellerService(repo)
+	service := service.NewSellerService(repo, logger)
 
 	err := service.DeleteSellerByID(ctx, "1")
 
@@ -258,8 +263,9 @@ func TestSellerService_UpdateSellerByID_Success(t *testing.T) {
 			return nil
 		},
 	}
+	logger, _ := zap.NewDevelopment()
 
-	service := service.NewSellerService(repo)
+	service := service.NewSellerService(repo, logger)
 
 	err := service.UpdateSellerByID(ctx, "1", updated)
 
@@ -280,8 +286,9 @@ func TestSellerService_UpdateOwnerByID_Success(t *testing.T) {
 			return nil
 		},
 	}
+	logger, _ := zap.NewDevelopment()
 
-	service := service.NewSellerService(repo)
+	service := service.NewSellerService(repo, logger)
 
 	err := service.UpdateOwnerByID(ctx, "1", updated)
 

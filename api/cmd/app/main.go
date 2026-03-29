@@ -40,8 +40,11 @@ func main() {
 	}
 
 	repository := repository.NewSellerRepository(db)
-	sellerService := service.NewSellerService(repository)
-	sellerHandler := handler.SellerHandler{Service: sellerService}
+	sellerService := service.NewSellerService(repository, zapLogger)
+	sellerHandler := handler.SellerHandler{
+		Service: sellerService,
+		Logger:  zapLogger,
+	}
 
 	router := gin.Default()
 
