@@ -1,13 +1,14 @@
 # capim
 
 ## Execução
-- Pré requisitos: Docker e Postman instalados.
+- Pré requisitos: Docker instalado.
 1. `cp .env.example .env` -> Copiar variaveis de ambiente
 2. `docker compose up --build` -> Sobe containers
-3. API está disponível em `http://localhost:3000`
-OBS: Caso a API não conecte ao banco na primeira execução, aguarde alguns segundos e reinicie o container da API:
+3. API está disponível em `http://localhost:3000` <br>
+OBS: Caso a API não conecte ao banco na primeira execução, aguarde alguns segundos e reinicie o container da API:<br>
 `docker compose restart api`
-- Exemplo de POST request:
+## Exemplo de requisições
+- POST Seller
 ```
 curl -X POST http://localhost:3000/sellers \
   -H "Content-Type: application/json" \
@@ -29,7 +30,42 @@ curl -X POST http://localhost:3000/sellers \
     ]
   }'
   ```
-- Qualidade de código:
+- GET Seller by ID
+```
+curl http://localhost:3000/sellers/1
+```
+- Get All Sellers
+```
+curl http://localhost:3000/sellers
+```
+- Update Seller by ID
+```
+curl -X PATCH http://localhost:3000/sellers/1   -H "Content-Type: application/json"   -d '{
+  "document": "323131",
+  "legal_name": "Empresa ABACATE",
+  "business_name": "Empresa abacate",
+  "bank_account": {
+    "bank_code": "002",
+    "agency_number": "134",
+    "account_number": "5672-0"
+  }
+}'
+```
+- Update Owner by ID
+```
+curl -X PATCH http://localhost:3000/owners/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Novo Nome",
+    "phone": "11988888888",
+    "email": "novo@email.com"
+  }'
+```
+- Delete Seller by ID
+```
+curl -X DELETE http://localhost:3000/sellers/1
+```
+## Qualidade de código:
 1. `make audit` -> Execução para monitoramento da qualidade de código
 2. `make test` -> Execução de testes e visualização da % de cobertura
 
