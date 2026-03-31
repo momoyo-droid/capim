@@ -2,9 +2,9 @@
 
 ## Execução
 - Pré requisitos: Docker instalado.
-1. `cp .env.example .env` -> Copiar variaveis de ambiente
-2. `docker compose up --build` -> Sobe containers
-3. API está disponível em `http://localhost:3000` <br>
+1. Copiar variaveis de ambiente: `cp .env.example .env` 
+2. Subir os containers: `docker compose up --build` 
+3. API estará disponível em `http://localhost:3000` <br>
 OBS: Caso a API não conecte ao banco na primeira execução, aguarde alguns segundos e reinicie o container da API:<br>
 `docker compose restart api`
 ## Exemplo de requisições
