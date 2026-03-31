@@ -1,9 +1,36 @@
 # capim
 
 ## Execução
-`go run api/cmd/app/main.go` -> Execução da API <br>
-`make audit` -> Execução para monitoramento da qualidade de código <br>
-`make test` -> Execução de testes e visualização da % de cobertura
+- Pré requisitos: Docker e Postman instalados.
+1. `cp .env.example .env` -> Copiar variaveis de ambiente
+2. `docker compose up --build` -> Sobe containers
+3. API está disponível em `http://localhost:3000`
+OBS: Caso a API não conecte ao banco na primeira execução, aguarde alguns segundos e reinicie o container da API:
+`docker compose restart api`
+- Exemplo de POST request:
+`curl -X POST http://localhost:3000/sellers \
+  -H "Content-Type: application/json" \
+  -d '{
+    "document": "123",
+    "legal_name": "Teste LTDA",
+    "business_name": "Teste",
+    "bank_account": {
+      "bank_code": "001",
+      "agency_number": "123",
+      "account_number": "456"
+    },
+    "owner": [
+      {
+        "name": "Ana",
+        "phone": "119999999",
+        "email": "ana@email.com"
+      }
+    ]
+  }'`
+
+- Qualidade de código:
+1. `make audit` -> Execução para monitoramento da qualidade de código
+2. `make test` -> Execução de testes e visualização da % de cobertura
 
 ## Justificativa Técnica
 1. Quais foram as 3 principais decisões técnicas mais importantes que você tomou e porquê?

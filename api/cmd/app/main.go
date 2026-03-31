@@ -58,7 +58,7 @@ func main() {
 
 	zapLogger.Info("Server is running on port " + cfg.Port)
 
-	if err := router.Run("localhost:" + cfg.Port); err != nil {
+	if err := router.Run(":" + cfg.Port); err != nil {
 		zapLogger.Fatal("Failed to start server", zap.Error(err))
 	}
 
