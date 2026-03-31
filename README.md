@@ -8,7 +8,7 @@
 OBS: Caso a API não conecte ao banco na primeira execução, aguarde alguns segundos e reinicie o container da API:
 `docker compose restart api`
 - Exemplo de POST request:
-curl -X POST http://localhost:3000/sellers \
+```curl -X POST http://localhost:3000/sellers \
   -H "Content-Type: application/json" \
   -d '{
     "document": "123",
@@ -26,7 +26,7 @@ curl -X POST http://localhost:3000/sellers \
         "email": "ana@email.com"
       }
     ]
-  }'
+  }'```
   
 - Qualidade de código:
 1. `make audit` -> Execução para monitoramento da qualidade de código
